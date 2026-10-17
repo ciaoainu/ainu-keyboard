@@ -172,7 +172,7 @@ class AinuKeyboardService : InputMethodService() {
         when (label) {
             "ABC", "KATA" -> {
                 latinMode = !latinMode
-                currentInputView?.invalidate()
+                setInputView(onCreateInputView())
             }
 
             "SPACE" -> insertText(" ")
