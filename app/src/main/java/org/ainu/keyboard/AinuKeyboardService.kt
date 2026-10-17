@@ -286,8 +286,12 @@ class AinuKeyboardService : InputMethodService() {
         val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         if (previous.isEmpty()) return
 
-        val sequence = diacriticCycles[previous] ?: return
-        val replacement = sequence.firstOrNull() ?: return
+        val cycle = diacriticCycles.values.firstOrNull {
+            previous in it
+        } ?: return
+
+        val index = cycle.indexOf(previous)
+        val replacement = cycle[(index + 1) % cycle.size]
         replacePrevious(replacement)
     }
 
