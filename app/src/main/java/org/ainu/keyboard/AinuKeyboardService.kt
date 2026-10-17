@@ -282,19 +282,21 @@ class AinuKeyboardService : InputMethodService() {
         replacePrevious(replacement)
     }
 
+    
     private fun cyclePrevious() {
         val ic = currentInputConnection ?: return
         val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         if (previous.isEmpty()) return
 
-        val cycle = diacriticCycles.values.firstOrNull {
-            previous in it
+        val cycle = diacriticCycles.firstOrNull { row ->
+            previous in row
         } ?: return
 
         val index = cycle.indexOf(previous)
         val replacement = cycle[(index + 1) % cycle.size]
         replacePrevious(replacement)
     }
+
 
     private val kanaMap = mapOf(
         "ア" to listOf("ア", "イ", "ウ", "エ", "オ"),
