@@ -44,10 +44,17 @@ class AinuKeyboardService : InputMethodService() {
         )
 
         private val latinRows = listOf(
-            listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"),
-            listOf("A", "S", "D", "F", "G", "H", "J", "K", "L"),
-            listOf("⇧", "Z", "X", "C", "V", "B", "N", "M", "⌫"),
-            listOf("KATA", "SPACE", "↵")
+            listOf("Q", "W", "E"),
+            listOf("R", "T", "Y"),
+            listOf("U", "I", "O"),
+            listOf("P", "A", "S"),
+            listOf("D", "F", "G"),
+            listOf("H", "J", "K"),
+            listOf("L", "Z", "X"),
+            listOf("C", "V", "B"),
+            listOf("N", "M", "⌫"),
+            listOf("←", "→", "KATA"),
+            listOf("😀", "SPACE", "↵")
         )
 
         private fun rows() = if (latinMode) latinRows else kanaRows
