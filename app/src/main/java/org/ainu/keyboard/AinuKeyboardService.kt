@@ -78,6 +78,12 @@ class AinuKeyboardService : InputMethodService() {
                     )
 
                     val label = currentRows[r][c]
+                    val displayLabel = when (label) {
+                        "UNDO" -> "↶"
+                        "SPACE" -> "␣"
+                        "記" -> "゛"
+                        else -> label
+                    }
                     paint.color = when (label) {
                         "SPACE", "↵", "→", "⌫", "UNDO", "←", "😀", "ABC", "KATA" ->
                             Color.rgb(204, 222, 241)
