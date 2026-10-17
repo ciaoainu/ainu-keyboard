@@ -40,7 +40,7 @@ class AinuKeyboardService : InputMethodService() {
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
             listOf("←", "タ", "ナ", "ハ", "→"),
             listOf("😀", "マ", "ヤ", "ラ", "SPACE"),
-            listOf("ABC", "゛", "ワ", "，", "↵")
+            listOf("ABC", "記", "ワ", "，", "↵")
         )
 
         private val latinRows = listOf(
@@ -79,7 +79,7 @@ class AinuKeyboardService : InputMethodService() {
 
                     val label = currentRows[r][c]
                     paint.color = when (label) {
-                        "SPACE", "↵", "⌫", "UNDO", "記", "ABC", "KATA" ->
+                        "SPACE", "↵", "→", "⌫", "UNDO", "←", "😀", "ABC", "KATA" ->
                             Color.rgb(204, 222, 241)
                         else -> Color.WHITE
                     }
