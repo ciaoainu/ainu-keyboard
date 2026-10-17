@@ -97,7 +97,7 @@ class AinuKeyboardService : InputMethodService() {
                         else -> dp(22).toFloat()
                     }
                     canvas.drawText(
-                        label,
+                        displayLabel,
                         rect.centerX(),
                         rect.centerY() - (paint.ascent() + paint.descent()) / 2,
                         paint
