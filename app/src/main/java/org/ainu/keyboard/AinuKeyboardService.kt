@@ -308,42 +308,58 @@ class AinuKeyboardService : InputMethodService() {
         "ワ" to listOf("ワ", "ヰ", "ン", "ヱ", "ヲ")
     )
 
-    private val diacriticCycles = mapOf(
-        "ア" to listOf("ア"),
-        "イ" to listOf("イ"),
-        "ウ" to listOf("ウ"),
-        "エ" to listOf("エ"),
-        "オ" to listOf("オ"),
-        "カ" to listOf("ガ"),
-        "キ" to listOf("ギ"),
-        "ク" to listOf("グ"),
-        "ケ" to listOf("ゲ"),
-        "コ" to listOf("ゴ"),
-        "サ" to listOf("ザ"),
-        "シ" to listOf("ジ"),
-        "ス" to listOf("ㇲ", "ズ"),
-        "セ" to listOf("ゼ"),
-        "ソ" to listOf("ゾ"),
-        "タ" to listOf("ダ"),
-        "チ" to listOf("ヂ"),
-        "ツ" to listOf("ッ", "ツ゚", "ヅ"),
-        "テ" to listOf("デ"),
-        "ト" to listOf("ㇳ", "ト゚", "ド"),
-        "ヌ" to listOf("ヌ"),
-        "ハ" to listOf("パ", "ㇵ", "バ"),
-        "ヒ" to listOf("ピ", "ㇶ", "ビ"),
-        "フ" to listOf("プ", "ㇷ゚", "ㇷ", "ブ"),
-        "ヘ" to listOf("ペ", "ㇸ", "ベ"),
-        "ホ" to listOf("ポ", "ㇹ", "ボ"),
-        "ム" to listOf("ム"),
-        "ヤ" to listOf("ヤ"),
-        "ユ" to listOf("ユ"),
-        "ヨ" to listOf("ヨ"),
-        "ラ" to listOf("ラ"),
-        "リ" to listOf("リ"),
-        "ル" to listOf("ル"),
-        "レ" to listOf("レ"),
-        "ロ" to listOf("ロ")
+    private val diacriticCycles = listOf(
+        listOf("ア", "ァ"),
+        listOf("イ", "ィ"),
+        listOf("ウ", "ゥ"),
+        listOf("エ", "ェ"),
+        listOf("オ", "ォ"),
+
+        listOf("カ", "ガ"),
+        listOf("キ", "ギ"),
+        listOf("ク", "ㇰ", "グ"),
+        listOf("ケ", "ゲ"),
+        listOf("コ", "ゴ"),
+
+        listOf("サ", "ザ"),
+        listOf("シ", "ㇱ", "ジ"),
+        listOf("ス", "ㇲ", "ズ"),
+        listOf("セ", "セ゚", "ゼ"),
+        listOf("ソ", "ゾ"),
+
+        listOf("タ", "ダ"),
+        listOf("チ", "ヂ"),
+        listOf("ツ", "ッ", "ツ゚", "ヅ"),
+        listOf("テ", "デ"),
+        listOf("ト", "ㇳ", "ト゚", "ド"),
+
+        listOf("ナ", "ナ"),
+        listOf("ニ", "ニ"),
+        listOf("ヌ", "ㇴ"),
+        listOf("ネ", "ネ"),
+        listOf("ノ", "ノ"),
+
+        listOf("ハ", "パ", "ㇵ", "バ"),
+        listOf("ヒ", "ピ", "ㇶ", "ビ"),
+        listOf("フ", "プ", "ㇷ゚", "ㇷ", "ブ"),
+        listOf("ヘ", "ペ", "ㇸ", "ベ"),
+        listOf("ホ", "ポ", "ㇹ", "ボ"),
+
+        listOf("マ", "マ"),
+        listOf("ミ", "ミ"),
+        listOf("ム", "ㇺ"),
+        listOf("メ", "メ"),
+        listOf("モ", "モ"),
+
+        listOf("ヤ", "ャ"),
+        listOf("ユ", "ュ"),
+        listOf("ヨ", "ョ"),
+
+        listOf("ラ", "ㇻ"),
+        listOf("リ", "ㇼ"),
+        listOf("ル", "ㇽ"),
+        listOf("レ", "ㇾ"),
+        listOf("ロ", "ㇿ")
     )
 
     private val voicedKana = mapOf(
