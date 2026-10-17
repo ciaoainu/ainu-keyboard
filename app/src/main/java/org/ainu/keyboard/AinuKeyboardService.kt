@@ -39,8 +39,8 @@ class AinuKeyboardService : InputMethodService() {
         private val kanaRows = listOf(
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
             listOf("←", "タ", "ナ", "ハ", "→"),
-            listOf("😀", "マ", "ヤ", "ラ", "↵"),
-            listOf("ABC", "，", "ワ", "記", "SPACE")
+            listOf("😀", "マ", "ヤ", "ラ", "SPACE"),
+            listOf("ABC", "゛", "ワ", "，", "↵")
         )
 
         private val latinRows = listOf(
