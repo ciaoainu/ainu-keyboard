@@ -6,86 +6,96 @@ import android.graphics.Paint
 import android.graphics.Color
 import android.graphics.RectF
 import android.view.View
+import android.view.ViewGroup
 import android.view.MotionEvent
+import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
 import kotlin.math.abs
 
 class AinuKeyboardService : InputMethodService() {
 
     private var latinMode = false
-    private var lastText = ""
+    private val undoHistory = mutableListOf<Pair<String, String>>()
 
     override fun onCreateInputView(): View {
-        return KeyboardView()
+        return KeyboardView().apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(if (latinMode) 300 else 250)
+            )
+        }
     }
 
-    private inner class KeyboardView : View(this@AinuKeyboardService) {
+    private fun dp(value: Int): Int =
+        (value * resources.displayMetrics.density).toInt()
 
+    private inner class KeyboardView : View(this@AinuKeyboardService) {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private var startX = 0f
         private var startY = 0f
-        private var startRow = -1
-        private var startCol = -1
+        private var startRow = 0
+        private var startCol = 0
 
         private val kanaRows = listOf(
-            listOf("ア", "カ", "サ"),
-            listOf("タ", "ナ", "ハ"),
-            listOf("マ", "ヤ", "ラ"),
-            listOf("ワ", "゛", "゜"),
-            listOf("←", "→", "UNDO"),
-            listOf("😀", "ABC", "⌫"),
-            listOf("。", "SPACE", "↵")
+            listOf("UNDO", "ア", "カ", "サ", "⌫"),
+            listOf("←", "タ", "ナ", "ハ", "→"),
+            listOf("😀", "マ", "ヤ", "ラ", "↵"),
+            listOf("ABC", "，", "ワ", "記", "SPACE")
         )
 
         private val latinRows = listOf(
-            listOf("Q", "W", "E"),
-            listOf("R", "T", "Y"),
-            listOf("U", "I", "O"),
-            listOf("P", "A", "S"),
-            listOf("D", "F", "G"),
-            listOf("H", "J", "K"),
-            listOf("L", "Z", "X"),
-            listOf("C", "V", "B"),
-            listOf("N", "M", "⌫"),
-            listOf("←", "→", "KATA"),
-            listOf("😀", "SPACE", "↵")
+            listOf("Q", "W", "E", "R", "T"),
+            listOf("Y", "U", "I", "O", "P"),
+            listOf("A", "S", "D", "F", "G"),
+            listOf("H", "J", "K", "L", "Z"),
+            listOf("X", "C", "V", "B", "N"),
+            listOf("⇧", "M", "KATA", "⌫", "SPACE")
         )
 
-        private fun rows() =
-            if (latinMode) latinRows else kanaRows
+        private fun rows() = if (latinMode) latinRows else kanaRows
+
+        override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+            val desiredHeight = dp(if (latinMode) 300 else 250)
+            val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
+            setMeasuredDimension(measuredWidth, desiredHeight)
+        }
 
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
-
-            canvas.drawColor(Color.rgb(225, 229, 235))
+            canvas.drawColor(Color.rgb(224, 229, 237))
 
             val currentRows = rows()
-            val cellW = width.toFloat() / 3
+            val cellW = width.toFloat() / 5
             val cellH = height.toFloat() / currentRows.size
 
             for (r in currentRows.indices) {
-                for (c in 0..2) {
-                    val left = c * cellW + 3f
-                    val top = r * cellH + 3f
+                for (c in 0 until 5) {
                     val rect = RectF(
-                        left, top,
-                        left + cellW - 6f,
-                        top + cellH - 6f
+                        c * cellW + dp(2).toFloat(),
+                        r * cellH + dp(2).toFloat(),
+                        (c + 1) * cellW - dp(2).toFloat(),
+                        (r + 1) * cellH - dp(2).toFloat()
                     )
 
-                    paint.color = Color.WHITE
-                    canvas.drawRoundRect(rect, 12f, 12f, paint)
-
                     val label = currentRows[r][c]
-                    paint.color = Color.DKGRAY
-                    paint.textAlign = Paint.Align.CENTER
-                    paint.textSize = cellH.coerceAtMost(48f) * 0.36f
+                    paint.color = when (label) {
+                        "SPACE", "↵", "⌫", "UNDO", "記", "ABC", "KATA" ->
+                            Color.rgb(204, 222, 241)
+                        else -> Color.WHITE
+                    }
+                    canvas.drawRoundRect(rect, dp(7).toFloat(), dp(7).toFloat(), paint)
 
+                    paint.color = Color.rgb(35, 43, 55)
+                    paint.textAlign = Paint.Align.CENTER
+                    paint.textSize = when {
+                        label == "SPACE" -> dp(13).toFloat()
+                        label.length > 2 -> dp(14).toFloat()
+                        else -> dp(22).toFloat()
+                    }
                     canvas.drawText(
                         label,
                         rect.centerX(),
-                        rect.centerY() -
-                            (paint.ascent() + paint.descent()) / 2,
+                        rect.centerY() - (paint.ascent() + paint.descent()) / 2,
                         paint
                     )
                 }
@@ -93,35 +103,32 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
-            val cellW = width.toFloat() / 3
+            val cellW = width.toFloat() / 5
             val cellH = height.toFloat() / rows().size
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     startX = event.x
                     startY = event.y
-                    startCol = (event.x / cellW).toInt()
-                        .coerceIn(0, 2)
-                    startRow = (event.y / cellH).toInt()
-                        .coerceIn(0, rows().lastIndex)
+                    startCol = (event.x / cellW).toInt().coerceIn(0, 4)
+                    startRow = (event.y / cellH).toInt().coerceIn(0, rows().lastIndex)
                     return true
                 }
 
                 MotionEvent.ACTION_UP -> {
                     val dx = event.x - startX
                     val dy = event.y - startY
+                    val threshold = dp(18).toFloat()
 
-                    val threshold = cellW * 0.22f
-                    var direction = ""
-
-                    if (abs(dx) > abs(dy) && abs(dx) > threshold) {
-                        direction = if (dx < 0) "left" else "right"
-                    } else if (abs(dy) > threshold) {
-                        direction = if (dy < 0) "up" else "down"
+                    val direction = when {
+                        abs(dx) > abs(dy) && abs(dx) > threshold ->
+                            if (dx < 0) "left" else "right"
+                        abs(dy) > threshold ->
+                            if (dy < 0) "up" else "down"
+                        else -> ""
                     }
 
-                    val label = rows()[startRow][startCol]
-                    handleKey(label, direction)
+                    handleKey(rows()[startRow][startCol], direction)
                     invalidate()
                     return true
                 }
@@ -130,9 +137,33 @@ class AinuKeyboardService : InputMethodService() {
         }
     }
 
-    private fun send(text: String) {
-        currentInputConnection?.commitText(text, 1)
-        lastText = text
+    private fun insertText(text: String) {
+        val ic = currentInputConnection ?: return
+        undoHistory.add("" to text)
+        ic.commitText(text, 1)
+    }
+
+    private fun replacePrevious(replacement: String) {
+        val ic = currentInputConnection ?: return
+        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        if (previous.isEmpty()) return
+
+        undoHistory.add(previous to replacement)
+        ic.deleteSurroundingText(1, 0)
+        if (replacement.isNotEmpty()) ic.commitText(replacement, 1)
+    }
+
+    private fun undo() {
+        val ic = currentInputConnection ?: return
+        if (undoHistory.isEmpty()) return
+
+        val (deleted, inserted) = undoHistory.removeAt(undoHistory.lastIndex)
+        if (inserted.isNotEmpty()) {
+            ic.deleteSurroundingText(inserted.length, 0)
+        }
+        if (deleted.isNotEmpty()) {
+            ic.commitText(deleted, 1)
+        }
     }
 
     private fun handleKey(label: String, direction: String) {
@@ -141,94 +172,119 @@ class AinuKeyboardService : InputMethodService() {
         when (label) {
             "ABC", "KATA" -> {
                 latinMode = !latinMode
+                currentInputView?.invalidate()
             }
 
-            "SPACE" -> send(" ")
+            "SPACE" -> insertText(" ")
 
             "↵" -> ic.sendKeyEvent(
-                android.view.KeyEvent(
-                    android.view.KeyEvent.ACTION_DOWN,
-                    android.view.KeyEvent.KEYCODE_ENTER
-                )
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
             )
 
             "⌫" -> {
-                ic.deleteSurroundingText(1, 0)
-                lastText = ""
+                val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: ""
+                if (previous.isNotEmpty()) {
+                    undoHistory.add(previous to "")
+                    ic.deleteSurroundingText(1, 0)
+                }
             }
 
             "←" -> ic.sendKeyEvent(
-                android.view.KeyEvent(
-                    android.view.KeyEvent.ACTION_DOWN,
-                    android.view.KeyEvent.KEYCODE_DPAD_LEFT
-                )
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT)
             )
 
             "→" -> ic.sendKeyEvent(
-                android.view.KeyEvent(
-                    android.view.KeyEvent.ACTION_DOWN,
-                    android.view.KeyEvent.KEYCODE_DPAD_RIGHT
-                )
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT)
             )
 
-            "UNDO" -> {
-                if (lastText.isNotEmpty()) {
-                    ic.deleteSurroundingText(lastText.length, 0)
-                    lastText = ""
+            "UNDO" -> undo()
+
+            "😀" -> insertText("😀")
+
+            "，" -> insertText(
+                when (direction) {
+                    "left" -> "。"
+                    "up" -> "？"
+                    "right" -> "！"
+                    "down" -> "・"
+                    else -> "，"
+                }
+            )
+
+            "記" -> {
+                when (direction) {
+                    "left" -> transformPrevious("dakuten")
+                    "right" -> transformPrevious("handakuten")
+                    "up" -> transformPrevious("small")
+                    "down" -> Unit
+                    else -> cyclePrevious()
                 }
             }
 
-            "😀" -> send("😀")
-            "。" -> send(
-                when (direction) {
-                    "left" -> ","
-                    "up" -> "?"
-                    "right" -> "!"
-                    "down" -> "・"
-                    else -> "。"
-                }
-            )
-
-            "゛" -> modifyPrevious(direction, "dakuten")
-            "゜" -> modifyPrevious(direction, "handakuten")
-
             else -> {
                 if (latinMode) {
-                    send(label.lowercase())
+                    when (label) {
+                        "⇧" -> Unit
+                        else -> insertText(label.lowercase())
+                    }
                 } else {
                     val chars = kanaMap[label] ?: listOf(label)
                     val chosen = when (direction) {
                         "left" -> chars.getOrElse(1) { chars[0] }
-                        "up" -> chars.getOrElse(2) { chars[0] }
-                        "right" -> chars.getOrElse(3) { chars[0] }
-                        "down" -> chars.getOrElse(4) { chars[0] }
+                        "up" -> {
+                            if (label == "ヤ") "ユ"
+                            else chars.getOrElse(2) { chars[0] }
+                        }
+                        "right" -> {
+                            if (label == "ヤ") ")"
+                            else chars.getOrElse(3) { chars[0] }
+                        }
+                        "down" -> {
+                            if (label == "ヤ") "ヨ"
+                            else chars.getOrElse(4) { chars[0] }
+                        }
                         else -> chars[0]
                     }
-                    send(chosen)
+
+                    val output = if (label == "ヤ") {
+                        when (direction) {
+                            "left" -> "("
+                            "up" -> "ユ"
+                            "right" -> ")"
+                            "down" -> "ヨ"
+                            else -> "ヤ"
+                        }
+                    } else chosen
+
+                    insertText(output)
                 }
             }
         }
     }
 
-    private fun modifyPrevious(direction: String, kind: String) {
+    private fun transformPrevious(kind: String) {
         val ic = currentInputConnection ?: return
-
-        val previous = ic.getTextBeforeCursor(1, 0)?.toString()
-            ?: return
+        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         if (previous.isEmpty()) return
 
-        val replacement = when {
-            direction == "up" -> smallKana[previous]
-            kind == "dakuten" || direction == "left" ->
-                voicedKana[previous]
-            kind == "handakuten" || direction == "right" ->
-                semiVoicedKana[previous]
+        val replacement = when (kind) {
+            "dakuten" -> voicedKana[previous]
+            "handakuten" -> semiVoicedKana[previous]
+            "small" -> smallKana[previous]
             else -> null
         } ?: return
 
-        ic.deleteSurroundingText(1, 0)
-        ic.commitText(replacement, 1)
-        lastText = replacement
+        replacePrevious(replacement)
+    }
+
+    private fun cyclePrevious() {
+        val ic = currentInputConnection ?: return
+        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        if (previous.isEmpty()) return
+
+        val sequence = diacriticCycles[previous] ?: return
+        val replacement = sequence.firstOrNull() ?: return
+        replacePrevious(replacement)
     }
 
     private val kanaMap = mapOf(
@@ -244,6 +300,44 @@ class AinuKeyboardService : InputMethodService() {
         "ワ" to listOf("ワ", "ヰ", "ン", "ヱ", "ヲ")
     )
 
+    private val diacriticCycles = mapOf(
+        "ア" to listOf("ア"),
+        "イ" to listOf("イ"),
+        "ウ" to listOf("ウ"),
+        "エ" to listOf("エ"),
+        "オ" to listOf("オ"),
+        "カ" to listOf("ガ"),
+        "キ" to listOf("ギ"),
+        "ク" to listOf("グ"),
+        "ケ" to listOf("ゲ"),
+        "コ" to listOf("ゴ"),
+        "サ" to listOf("ザ"),
+        "シ" to listOf("ジ"),
+        "ス" to listOf("ㇲ", "ズ"),
+        "セ" to listOf("ゼ"),
+        "ソ" to listOf("ゾ"),
+        "タ" to listOf("ダ"),
+        "チ" to listOf("ヂ"),
+        "ツ" to listOf("ッ", "ツ゚", "ヅ"),
+        "テ" to listOf("デ"),
+        "ト" to listOf("ㇳ", "ト゚", "ド"),
+        "ヌ" to listOf("ヌ"),
+        "ハ" to listOf("パ", "ㇵ", "バ"),
+        "ヒ" to listOf("ピ", "ㇶ", "ビ"),
+        "フ" to listOf("プ", "ㇷ゚", "ㇷ", "ブ"),
+        "ヘ" to listOf("ペ", "ㇸ", "ベ"),
+        "ホ" to listOf("ポ", "ㇹ", "ボ"),
+        "ム" to listOf("ム"),
+        "ヤ" to listOf("ヤ"),
+        "ユ" to listOf("ユ"),
+        "ヨ" to listOf("ヨ"),
+        "ラ" to listOf("ラ"),
+        "リ" to listOf("リ"),
+        "ル" to listOf("ル"),
+        "レ" to listOf("レ"),
+        "ロ" to listOf("ロ")
+    )
+
     private val voicedKana = mapOf(
         "カ" to "ガ", "キ" to "ギ", "ク" to "グ",
         "ケ" to "ゲ", "コ" to "ゴ",
@@ -252,14 +346,15 @@ class AinuKeyboardService : InputMethodService() {
         "タ" to "ダ", "チ" to "ヂ", "ツ" to "ヅ",
         "テ" to "デ", "ト" to "ド",
         "ハ" to "バ", "ヒ" to "ビ", "フ" to "ブ",
-        "ヘ" to "ベ", "ホ" to "ボ"
+        "ヘ" to "ベ", "ホ" to "ボ",
+        "ㇷ" to "ㇷ゙"
     )
 
     private val semiVoicedKana = mapOf(
         "ハ" to "パ", "ヒ" to "ピ", "フ" to "プ",
         "ヘ" to "ペ", "ホ" to "ポ",
-        "セ" to "セ゚", "ツ" to "ツ゚",
-        "ト" to "ト゚"
+        "プ" to "ㇷ゚", "ㇷ" to "ㇷ゚",
+        "セ" to "セ゚", "ツ" to "ツ゚", "ト" to "ト゚"
     )
 
     private val smallKana = mapOf(
