@@ -268,13 +268,14 @@ class AinuKeyboardService : InputMethodService() {
 
     private fun transformPrevious(kind: String) {
         val ic = currentInputConnection ?: return
-        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        val previous = ic.getTextBeforeCursor(2, 0)?.toString() ?: return
+        val kana = previous.takeLast(1)
         if (previous.isEmpty()) return
 
         val replacement = when (kind) {
-            "dakuten" -> voicedKana[previous]
-            "handakuten" -> semiVoicedKana[previous]
-            "small" -> smallKana[previous]
+            "dakuten" -> voicedKana[kana]
+            "handakuten" -> semiVoicedKana[kana]
+            "small" -> smallKana[kana]
             else -> null
         } ?: return
 
