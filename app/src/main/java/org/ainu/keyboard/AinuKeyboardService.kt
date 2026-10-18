@@ -154,15 +154,18 @@ class AinuKeyboardService : InputMethodService() {
         ic.commitText(text, 1)
     }
 
-    private fun replacePrevious(replacement: String) {
+    
+    private fun replacePreviousText(previous: String, replacement: String) {
         val ic = currentInputConnection ?: return
-        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         if (previous.isEmpty()) return
 
         undoHistory.add(previous to replacement)
-        ic.deleteSurroundingText(1, 0)
-        if (replacement.isNotEmpty()) ic.commitText(replacement, 1)
+        ic.deleteSurroundingText(previous.length, 0)
+        if (replacement.isNotEmpty()) {
+            ic.commitText(replacement, 1)
+        }
     }
+
 
     private fun undo() {
         val ic = currentInputConnection ?: return
@@ -273,36 +276,53 @@ class AinuKeyboardService : InputMethodService() {
         }
     }
 
+    
     private fun transformPrevious(kind: String) {
         val ic = currentInputConnection ?: return
-        val previous = ic.getTextBeforeCursor(2, 0)?.toString() ?: return
-        val kana = previous.takeLast(1)
-        if (previous.isEmpty()) return
+        val before = ic.getTextBeforeCursor(8, 0)?.toString() ?: return
+        if (before.isEmpty()) return
 
-        val replacement = when (kind) {
-            "dakuten" -> voicedKana[kana]
-            "handakuten" -> semiVoicedKana[kana]
-            "small" -> smallKana[kana]
-            else -> null
-        } ?: return
+        val mapping = when (kind) {
+            "dakuten" -> voicedKana
+            "handakuten" -> semiVoicedKana
+            "small" -> smallKana
+            else -> return
+        }
 
-        replacePrevious(replacement)
+        val previous = mapping.keys
+            .sortedByDescending { it.length }
+            .firstOrNull { before.endsWith(it) }
+            ?: return
+
+        val replacement = mapping[previous] ?: return
+        replacePreviousText(previous, replacement)
     }
 
+
+    
     
     private fun cyclePrevious() {
         val ic = currentInputConnection ?: return
-        val previous = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
-        if (previous.isEmpty()) return
+        val before = ic.getTextBeforeCursor(8, 0)?.toString() ?: return
+        if (before.isEmpty()) return
 
-        val cycle = diacriticCycles.firstOrNull { row ->
-            previous in row
-        } ?: return
+        val candidates = diacriticCycles
+            .flatten()
+            .distinct()
+            .sortedByDescending { it.length }
+
+        val previous = candidates.firstOrNull { before.endsWith(it) }
+            ?: return
+
+        val cycle = diacriticCycles.firstOrNull { previous in it }
+            ?: return
 
         val index = cycle.indexOf(previous)
         val replacement = cycle[(index + 1) % cycle.size]
-        replacePrevious(replacement)
+
+        replacePreviousText(previous, replacement)
     }
+
 
 
     private val kanaMap = mapOf(
@@ -380,8 +400,7 @@ class AinuKeyboardService : InputMethodService() {
         "タ" to "ダ", "チ" to "ヂ", "ツ" to "ヅ",
         "テ" to "デ", "ト" to "ド",
         "ハ" to "バ", "ヒ" to "ビ", "フ" to "ブ",
-        "ヘ" to "ベ", "ホ" to "ボ",
-        "ㇷ" to "ㇷ゙"
+        "ヘ" to "ベ", "ホ" to "ボ"
     )
 
     private val semiVoicedKana = mapOf(
