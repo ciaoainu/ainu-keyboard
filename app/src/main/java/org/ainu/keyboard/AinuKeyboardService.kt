@@ -418,7 +418,8 @@ class AinuKeyboardService : InputMethodService() {
         "ク" to "ㇰ", "シ" to "ㇱ", "ス" to "ㇲ",
         "ト" to "ㇳ", "ヌ" to "ㇴ",
         "ハ" to "ㇵ", "ヒ" to "ㇶ", "フ" to "ㇷ",
-        "ヘ" to "ㇸ", "ホ" to "ㇹ", "プ" to "ㇷ゚"
+        "プ" to "ㇷ゚",
+        "ヘ" to "ㇸ", "ホ" to "ㇹ",
         "ム" to "ㇺ",
         "ラ" to "ㇻ", "リ" to "ㇼ", "ル" to "ㇽ",
         "レ" to "ㇾ", "ロ" to "ㇿ"
