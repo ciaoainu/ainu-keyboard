@@ -406,7 +406,7 @@ class AinuKeyboardService : InputMethodService() {
     private val semiVoicedKana = mapOf(
         "ハ" to "パ", "ヒ" to "ピ", "フ" to "プ",
         "ヘ" to "ペ", "ホ" to "ポ",
-        "プ" to "ㇷ゚", "ㇷ" to "ㇷ゚",
+        "ㇷ" to "ㇷ゚",
         "セ" to "セ゚", "ツ" to "ツ゚", "ト" to "ト゚"
     )
 
@@ -418,7 +418,7 @@ class AinuKeyboardService : InputMethodService() {
         "ク" to "ㇰ", "シ" to "ㇱ", "ス" to "ㇲ",
         "ト" to "ㇳ", "ヌ" to "ㇴ",
         "ハ" to "ㇵ", "ヒ" to "ㇶ", "フ" to "ㇷ",
-        "ヘ" to "ㇸ", "ホ" to "ㇹ",
+        "ヘ" to "ㇸ", "ホ" to "ㇹ", "プ" to "ㇷ゚"
         "ム" to "ㇺ",
         "ラ" to "ㇻ", "リ" to "ㇼ", "ル" to "ㇽ",
         "レ" to "ㇾ", "ロ" to "ㇿ"
