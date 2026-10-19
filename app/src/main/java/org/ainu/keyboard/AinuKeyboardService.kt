@@ -72,7 +72,6 @@ class AinuKeyboardService : InputMethodService() {
             for (r in currentRows.indices) {
                 val row = currentRows[r]
 
-                // Latin rows have their own widths and positioning.
                 val weights = if (latin) {
                     when (r) {
                         0 -> List(row.size) { 1f }
@@ -95,7 +94,11 @@ class AinuKeyboardService : InputMethodService() {
                 }
 
                 val totalWeight = weights.sum()
-                val unitW = width.toFloat() / totalWeight
+                val unitW = if (latin && r == 1) {
+                    width.toFloat() / 10f
+                } else {
+                    width.toFloat() / totalWeight
+                }
                 val rowWidth = width.toFloat()
                 val offsetX = if (latin && r == 1) {
                     (rowWidth - rowWidth * totalWeight / 10f) / 2f
@@ -165,39 +168,100 @@ class AinuKeyboardService : InputMethodService() {
         }
 
 
-        override fun onTouchEvent(event: MotionEvent): Boolean {
-            val cellW = width.toFloat() / 5
-            val cellH = height.toFloat() / rows().size
+        
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val currentRows = rows()
+        val latin = latinMode
+        val cellH = height.toFloat() / currentRows.size
 
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startX = event.x
-                    startY = event.y
-                    startCol = (event.x / cellW).toInt().coerceIn(0, 4)
-                    startRow = (event.y / cellH).toInt().coerceIn(0, rows().lastIndex)
-                    return true
-                }
+        fun keyWeights(rowIndex: Int): List<Float> {
+            val row = currentRows[rowIndex]
 
-                MotionEvent.ACTION_UP -> {
-                    val dx = event.x - startX
-                    val dy = event.y - startY
-                    val threshold = dp(18).toFloat()
-
-                    val direction = when {
-                        abs(dx) > abs(dy) && abs(dx) > threshold ->
-                            if (dx < 0) "left" else "right"
-                        abs(dy) > threshold ->
-                            if (dy < 0) "up" else "down"
-                        else -> ""
+            return if (!latin) {
+                List(row.size) { 1f }
+            } else {
+                when (rowIndex) {
+                    0, 1 -> List(row.size) { 1f }
+                    2 -> row.map {
+                        if (it == "⇧" || it == "⌫") 1.4f else 1f
                     }
-
-                    handleKey(rows()[startRow][startCol], direction)
-                    invalidate()
-                    return true
+                    3 -> row.map {
+                        when (it) {
+                            "KATA", "↵" -> 1.2f
+                            ",", "." -> 0.8f
+                            "SPACE" -> 4.5f
+                            else -> 1f
+                        }
+                    }
+                    else -> List(row.size) { 1f }
                 }
             }
-            return true
         }
+
+        fun findColumn(rowIndex: Int, touchX: Float): Int {
+            val row = currentRows[rowIndex]
+            val weights = keyWeights(rowIndex)
+
+            val unitW = if (latin && rowIndex == 1) {
+                width.toFloat() / 10f
+            } else {
+                width.toFloat() / weights.sum()
+            }
+
+            val offsetX = if (latin && rowIndex == 1) {
+                width.toFloat() / 20f
+            } else {
+                0f
+            }
+
+            var x = offsetX
+
+            for (c in row.indices) {
+                val right = x + unitW * weights[c]
+                if (touchX >= x && touchX < right) {
+                    return c
+                }
+                x = right
+            }
+
+            return if (touchX < offsetX) 0 else row.lastIndex
+        }
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                startX = event.x
+                startY = event.y
+                startRow = (event.y / cellH)
+                    .toInt()
+                    .coerceIn(0, currentRows.lastIndex)
+                startCol = findColumn(startRow, event.x)
+                return true
+            }
+
+            MotionEvent.ACTION_UP -> {
+                val dx = event.x - startX
+                val dy = event.y - startY
+                val threshold = dp(18).toFloat()
+
+                val direction = when {
+                    abs(dx) > abs(dy) && abs(dx) > threshold ->
+                        if (dx < 0) "left" else "right"
+
+                    abs(dy) > threshold ->
+                        if (dy < 0) "up" else "down"
+
+                    else -> ""
+                }
+
+                handleKey(currentRows[startRow][startCol], direction)
+                invalidate()
+                return true
+            }
+        }
+
+        return true
+    }
+
     }
 
     private fun insertText(text: String) {
