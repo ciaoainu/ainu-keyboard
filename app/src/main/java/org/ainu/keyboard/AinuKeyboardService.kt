@@ -15,6 +15,7 @@ import kotlin.math.abs
 class AinuKeyboardService : InputMethodService() {
 
     private var latinMode = false
+    private var latinShift = false
     private val undoHistory = mutableListOf<Pair<String, String>>()
 
     override fun onCreateInputView(): View {
