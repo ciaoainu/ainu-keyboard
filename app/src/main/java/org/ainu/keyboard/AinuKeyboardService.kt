@@ -35,6 +35,7 @@ class AinuKeyboardService : InputMethodService() {
         private var startY = 0f
         private var startRow = 0
         private var startCol = 0
+        private var latinShift = false
 
         private val kanaRows = listOf(
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
@@ -44,17 +45,10 @@ class AinuKeyboardService : InputMethodService() {
         )
 
         private val latinRows = listOf(
-            listOf("Q", "W", "E"),
-            listOf("R", "T", "Y"),
-            listOf("U", "I", "O"),
-            listOf("P", "A", "S"),
-            listOf("D", "F", "G"),
-            listOf("H", "J", "K"),
-            listOf("L", "Z", "X"),
-            listOf("C", "V", "B"),
-            listOf("N", "M", "⌫"),
-            listOf("←", "→", "KATA"),
-            listOf("😀", "SPACE", "↵")
+            listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"),
+            listOf("A", "S", "D", "F", "G", "H", "J", "K", "L"),
+            listOf("⇧", "Z", "X", "C", "V", "B", "N", "M", "⌫"),
+            listOf("KATA", ",", "SPACE", ".", "↵")
         )
 
         private fun rows() = if (latinMode) latinRows else kanaRows
@@ -191,6 +185,16 @@ class AinuKeyboardService : InputMethodService() {
 
             "SPACE" -> insertText(" ")
 
+            "," -> insertText(",")
+
+            "." -> insertText(".")
+
+            "⇧" -> {
+                if (latinMode) {
+                    latinShift = !latinShift
+                }
+            }
+
             "↵" -> ic.sendKeyEvent(
                 KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
             )
@@ -237,9 +241,15 @@ class AinuKeyboardService : InputMethodService() {
 
             else -> {
                 if (latinMode) {
-                    when (label) {
-                        "⇧" -> Unit
-                        else -> insertText(label.lowercase())
+                    if (label.length == 1 && label[0].isLetter()) {
+                        val output = if (latinShift) {
+                            label.uppercase()
+                        } else {
+                            label.lowercase()
+                        }
+
+                        insertText(output)
+                        latinShift = false
                     }
                 } else {
                     val chars = kanaMap[label] ?: listOf(label)
