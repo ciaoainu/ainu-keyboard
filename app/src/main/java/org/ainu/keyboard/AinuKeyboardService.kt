@@ -60,53 +60,110 @@ class AinuKeyboardService : InputMethodService() {
             setMeasuredDimension(measuredWidth, desiredHeight)
         }
 
+        
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
             canvas.drawColor(Color.rgb(224, 229, 237))
 
             val currentRows = rows()
-            val cellW = width.toFloat() / 5
-            val cellH = height.toFloat() / currentRows.size
+            val latin = latinMode
+            val rowH = height.toFloat() / currentRows.size
 
             for (r in currentRows.indices) {
-                for (c in 0 until 5) {
+                val row = currentRows[r]
+
+                // Latin rows have their own widths and positioning.
+                val weights = if (latin) {
+                    when (r) {
+                        0 -> List(row.size) { 1f }
+                        1 -> List(row.size) { 1f }
+                        2 -> row.map {
+                            if (it == "⇧" || it == "⌫") 1.4f else 1f
+                        }
+                        3 -> row.map {
+                            when (it) {
+                                "KATA", "↵" -> 1.2f
+                                "," , "." -> 0.8f
+                                "SPACE" -> 4.5f
+                                else -> 1f
+                            }
+                        }
+                        else -> List(row.size) { 1f }
+                    }
+                } else {
+                    List(row.size) { 1f }
+                }
+
+                val totalWeight = weights.sum()
+                val unitW = width.toFloat() / totalWeight
+                val rowWidth = width.toFloat()
+                val offsetX = if (latin && r == 1) {
+                    (rowWidth - rowWidth * totalWeight / 10f) / 2f
+                } else {
+                    0f
+                }
+
+                var x = offsetX
+
+                for (c in row.indices) {
+                    val label = row[c]
+                    val cellW = unitW * weights[c]
+
                     val rect = RectF(
-                        c * cellW + dp(2).toFloat(),
-                        r * cellH + dp(2).toFloat(),
-                        (c + 1) * cellW - dp(2).toFloat(),
-                        (r + 1) * cellH - dp(2).toFloat()
+                        x + dp(2).toFloat(),
+                        r * rowH + dp(2).toFloat(),
+                        x + cellW - dp(2).toFloat(),
+                        (r + 1) * rowH - dp(2).toFloat()
                     )
 
-                    val label = currentRows[r][c]
                     val displayLabel = when (label) {
                         "UNDO" -> "↶"
-                        "SPACE" -> "␣"
+                        "SPACE" -> if (latin) "" else "␣"
                         "記" -> "゛"
                         else -> label
                     }
-                    paint.color = when (label) {
-                        "SPACE", "↵", "→", "⌫", "UNDO", "←", "😀", "ABC", "KATA" ->
-                            Color.rgb(204, 222, 241)
-                        else -> Color.WHITE
-                    }
-                    canvas.drawRoundRect(rect, dp(7).toFloat(), dp(7).toFloat(), paint)
 
-                    paint.color = Color.rgb(35, 43, 55)
-                    paint.textAlign = Paint.Align.CENTER
-                    paint.textSize = when {
-                        label == "SPACE" -> dp(13).toFloat()
-                        label.length > 2 -> dp(14).toFloat()
-                        else -> dp(22).toFloat()
+                    paint.color = if (latin) {
+                        when (label) {
+                             "⇧", "⌫", "KATA", ",", ".", "↵" ->
+                                Color.rgb(204, 222, 241)
+                            else -> Color.WHITE
+                        }
+                    } else {
+                        when (label) {
+                            "SPACE", "↵", "→", "⌫", "UNDO",
+                            "←", "😀", "ABC", "KATA" ->
+                                Color.rgb(204, 222, 241)
+                            else -> Color.WHITE
+                        }
                     }
-                    canvas.drawText(
-                        displayLabel,
-                        rect.centerX(),
-                        rect.centerY() - (paint.ascent() + paint.descent()) / 2,
-                        paint
+
+                    canvas.drawRoundRect(
+                        rect, dp(7).toFloat(), dp(7).toFloat(), paint
                     )
+
+                    if (displayLabel.isNotEmpty()) {
+                        paint.color = Color.rgb(35, 43, 55)
+                        paint.textAlign = Paint.Align.CENTER
+                        paint.textSize = when {
+                            label == "SPACE" -> dp(13).toFloat()
+                            label.length > 2 -> dp(14).toFloat()
+                            else -> dp(22).toFloat()
+                        }
+
+                        canvas.drawText(
+                            displayLabel,
+                            rect.centerX(),
+                            rect.centerY() - (paint.ascent() + paint.descent()) / 2,
+                            paint
+                        )
+                    }
+
+                    x += cellW
                 }
             }
         }
+
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
             val cellW = width.toFloat() / 5
