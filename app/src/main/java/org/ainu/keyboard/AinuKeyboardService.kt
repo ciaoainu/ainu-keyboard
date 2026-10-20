@@ -91,7 +91,7 @@ class AinuKeyboardService : InputMethodService() {
                         0 -> List(row.size) { 1f }
                         1 -> List(row.size) { 1f }
                         2 -> row.map {
-                            if (it == "⇧" || it == "⌫") 1.4f else 1f
+                            if (it == "⇧" || it == "😀" || it == "⌫") 1.4f else 1f
                         }
                         3 -> row.map {
                             when (it) {
@@ -108,13 +108,13 @@ class AinuKeyboardService : InputMethodService() {
                 }
 
                 val totalWeight = weights.sum()
-                val unitW = if (latin && r == 1) {
+                val unitW = if (latinMode && r == 1) {
                     width.toFloat() / 10f
                 } else {
                     width.toFloat() / totalWeight
                 }
                 val rowWidth = width.toFloat()
-                val offsetX = if (latin && r == 1) {
+                val offsetX = if (latinMode && r == 1) {
                     (rowWidth - rowWidth * totalWeight / 10f) / 2f
                 } else {
                     0f
@@ -140,19 +140,22 @@ class AinuKeyboardService : InputMethodService() {
                         else -> label
                     }
 
-                    paint.color = if (latin) {
-                        when (label) {
-                             "⇧", "⌫", "KATA", ",", ".", "↵" ->
-                                Color.rgb(204, 222, 241)
-                            else -> Color.WHITE
-                        }
-                    } else {
-                        when (label) {
+                    paint.color = when {
+                        numberMode && label in listOf(
+                            "😀", "⌫", "ABC", ",", ".", "↵"
+                        ) -> Color.rgb(204, 222, 241)
+
+                        latinMode && label in listOf(
+                            "⇧", "⌫", "KATA", ",", ".", "↵"
+                        ) -> Color.rgb(204, 222, 241)
+
+                        !latinMode && !numberMode && label in listOf(
                             "SPACE", "↵", "→", "⌫", "UNDO",
-                            "←", "😀", "ABC", "KATA" ->
-                                Color.rgb(204, 222, 241)
-                            else -> Color.WHITE
-                        }
+                            "←", "😀", "ABC", "KATA"
+                        ) -> Color.rgb(204, 222, 241)
+
+                        else -> Color.WHITE
+                    }
                     }
 
                     canvas.drawRoundRect(
@@ -197,7 +200,7 @@ class AinuKeyboardService : InputMethodService() {
                 when (rowIndex) {
                     0, 1 -> List(row.size) { 1f }
                     2 -> row.map {
-                        if (it == "⇧" || it == "⌫") 1.4f else 1f
+                        if (it == "⇧" || it == "😀" || it == "⌫") 1.4f else 1f
                     }
                     3 -> row.map {
                         when (it) {
@@ -216,13 +219,13 @@ class AinuKeyboardService : InputMethodService() {
             val row = currentRows[rowIndex]
             val weights = keyWeights(rowIndex)
 
-            val unitW = if (latin && rowIndex == 1) {
+            val unitW = if (latinMode && rowIndex == 1) {
                 width.toFloat() / 10f
             } else {
                 width.toFloat() / weights.sum()
             }
 
-            val offsetX = if (latin && rowIndex == 1) {
+            val offsetX = if (latinMode && rowIndex == 1) {
                 width.toFloat() / 20f
             } else {
                 0f
