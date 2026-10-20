@@ -156,7 +156,7 @@ class AinuKeyboardService : InputMethodService() {
 
                         else -> Color.WHITE
                     }
-                    }
+                }
 
                     canvas.drawRoundRect(
                         rect, dp(7).toFloat(), dp(7).toFloat(), paint
