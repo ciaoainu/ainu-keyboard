@@ -16,6 +16,7 @@ class AinuKeyboardService : InputMethodService() {
 
     private var latinMode = false
     private var latinShift = false
+    private var numberMode = false
     private val undoHistory = mutableListOf<Pair<String, String>>()
 
     override fun onCreateInputView(): View {
@@ -61,7 +62,11 @@ class AinuKeyboardService : InputMethodService() {
         )
 
 
-        private fun rows() = if (latinMode) latinRows else kanaRows
+        private fun rows() = when {
+            numberMode -> numberRows
+            latinMode -> latinRows
+            else -> kanaRows
+        }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
             val desiredHeight = dp(if (latinMode) 300 else 250)
@@ -75,7 +80,7 @@ class AinuKeyboardService : InputMethodService() {
             canvas.drawColor(Color.rgb(224, 229, 237))
 
             val currentRows = rows()
-            val latin = latinMode
+            val latin = latinMode || numberMode
             val rowH = height.toFloat() / currentRows.size
 
             for (r in currentRows.indices) {
@@ -180,7 +185,7 @@ class AinuKeyboardService : InputMethodService() {
         
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val currentRows = rows()
-        val latin = latinMode
+        val latin = latinMode || numberMode
         val cellH = height.toFloat() / currentRows.size
 
         fun keyWeights(rowIndex: Int): List<Float> {
@@ -310,7 +315,20 @@ class AinuKeyboardService : InputMethodService() {
 
         when (label) {
             "ABC", "KATA" -> {
-                latinMode = !latinMode
+                when {
+                    numberMode -> {
+                        numberMode = false
+                        latinMode = false
+                    }
+                    latinMode -> {
+                        latinMode = false
+                        numberMode = true
+                    }
+                    else -> {
+                        latinMode = true
+                        numberMode = false
+                    }
+                }
                 setInputView(onCreateInputView())
             }
 
