@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
 import kotlin.math.abs
+import android.graphics.Typeface
 
 class AinuKeyboardService : InputMethodService() {
 
@@ -25,7 +26,7 @@ class AinuKeyboardService : InputMethodService() {
         return KeyboardView().apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp( if (emojiMode) 340 else if (latinMode) 300 else 250 )
+                dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 24)
             )
         }
     }
@@ -86,7 +87,7 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-            val desiredHeight = dp(if (emojiMode) 340 else if (latinMode) 300 else 250)
+            val desiredHeight = dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 24)
             val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
             setMeasuredDimension(measuredWidth, desiredHeight)
         }
@@ -98,7 +99,8 @@ class AinuKeyboardService : InputMethodService() {
 
             val currentRows = rows()
             val latin = latinMode || numberMode
-            val rowH = height.toFloat() / currentRows.size
+            val topPadding = dp(24).toFloat()
+            val rowH = (height.toFloat() - topPadding) / currentRows.size
 
             for (r in currentRows.indices) {
                 val row = currentRows[r]
@@ -156,9 +158,9 @@ class AinuKeyboardService : InputMethodService() {
 
                     val rect = RectF(
                         x + dp(2).toFloat(),
-                        r * rowH + dp(2).toFloat(),
+                        topPadding + r * rowH + dp(2).toFloat(),
                         x + cellW - dp(2).toFloat(),
-                        (r + 1) * rowH - dp(2).toFloat()
+                        topPadding + (r + 1) * rowH - dp(2).toFloat()
                     )
 
                     val displayLabel = when (label) {
@@ -169,6 +171,7 @@ class AinuKeyboardService : InputMethodService() {
                         "→" -> "▸"
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
+                        "ABC", "KATA" -> "アA1"
                         else -> label
                     }
 
@@ -206,12 +209,46 @@ class AinuKeyboardService : InputMethodService() {
                             else -> dp(22).toFloat()
                         }
 
-                        canvas.drawText(
-                            displayLabel,
-                            rect.centerX(),
-                            rect.centerY() - (paint.ascent() + paint.descent()) / 2,
-                            paint
-                        )
+                        val textY = rect.centerY() -
+                            (paint.ascent() + paint.descent()) / 2
+
+                        if (label == "ABC" || label == "KATA") {
+                            val chars = listOf("ア", "A", "1")
+                            val widths = chars.map { char ->
+                                paint.isFakeBoldText = false
+                                paint.measureText(char)
+                            }
+                            val totalWidth = widths.sum()
+                            var textX = rect.centerX() - totalWidth / 2f
+
+                            for (i in chars.indices) {
+                                paint.isFakeBoldText = when {
+                                    numberMode -> chars[i] == "1"
+                                    latinMode -> chars[i] == "A"
+                                    else -> chars[i] == "ア"
+                                }
+
+                                val charWidth = paint.measureText(chars[i])
+
+                                canvas.drawText(
+                                    chars[i],
+                                    textX + charWidth / 2f,
+                                    textY,
+                                    paint
+                                )
+
+                                textX += widths[i]
+                            }
+
+                            paint.isFakeBoldText = false
+                        } else {
+                            canvas.drawText(
+                                displayLabel,
+                                rect.centerX(),
+                                textY,
+                                paint
+                            )
+                        }
                     }
 
                     x += cellW
@@ -224,7 +261,8 @@ class AinuKeyboardService : InputMethodService() {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val currentRows = rows()
         val latin = latinMode || numberMode
-        val cellH = height.toFloat() / currentRows.size
+        val topPadding = dp(24).toFloat()
+        val cellH = (height.toFloat() - topPadding) / currentRows.size
 
         fun keyWeights(rowIndex: Int): List<Float> {
             val row = currentRows[rowIndex]
@@ -292,7 +330,12 @@ class AinuKeyboardService : InputMethodService() {
             MotionEvent.ACTION_DOWN -> {
                 startX = event.x
                 startY = event.y
-                startRow = (event.y / cellH)
+                if (event.y < topPadding) {
+                    startRow = -1
+                    return true
+                }
+
+                startRow = ((event.y - topPadding) / cellH)
                     .toInt()
                     .coerceIn(0, currentRows.lastIndex)
                 startCol = findColumn(startRow, event.x)
@@ -300,6 +343,7 @@ class AinuKeyboardService : InputMethodService() {
             }
 
             MotionEvent.ACTION_UP -> {
+                if (startRow < 0) return true
                 val dx = event.x - startX
                 val dy = event.y - startY
                 val threshold = dp(18).toFloat()
