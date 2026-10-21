@@ -25,7 +25,7 @@ class AinuKeyboardService : InputMethodService() {
         return KeyboardView().apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(if (latinMode) 300 else 250)
+                dp( if (emojiMode) 340 else if (latinMode) 300 else 250 )
             )
         }
     }
@@ -86,7 +86,7 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-            val desiredHeight = dp(if (latinMode) 300 else 250)
+            val desiredHeight = dp(if (emojiMode) 340 else if (latinMode) 300 else 250)
             val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
             setMeasuredDimension(measuredWidth, desiredHeight)
         }
@@ -211,6 +211,9 @@ class AinuKeyboardService : InputMethodService() {
 
         fun keyWeights(rowIndex: Int): List<Float> {
             val row = currentRows[rowIndex]
+            if (emojiMode) {
+                return List(row.size) { 1f }
+            }
 
             return if (!latin) {
                 List(row.size) { 1f }
@@ -332,7 +335,7 @@ class AinuKeyboardService : InputMethodService() {
     }
 
     private fun handleKey(label: String, direction: String) {
-        if (label == "☺︎記" && !emojiMode) {
+        if ((label == "☺︎記" || label == "😀") && !emojiMode) {
             returnToLatin = latinMode || numberMode
             emojiMode = true
             setInputView(onCreateInputView())
