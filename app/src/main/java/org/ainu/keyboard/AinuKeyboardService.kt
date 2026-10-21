@@ -165,6 +165,8 @@ class AinuKeyboardService : InputMethodService() {
                         "UNDO" -> "↶"
                         "SPACE" -> if (emojiMode || latin) "" else "␣"
                         "記" -> "゛"
+                        "←" -> "◂"
+                        "→" -> "▸"
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
                         else -> label
