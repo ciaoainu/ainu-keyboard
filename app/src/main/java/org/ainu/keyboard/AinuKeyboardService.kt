@@ -103,7 +103,18 @@ class AinuKeyboardService : InputMethodService() {
             for (r in currentRows.indices) {
                 val row = currentRows[r]
 
-                val weights = if (latin) {
+                val weights = if (emojiMode) {
+                    if (r == currentRows.lastIndex) {
+                        row.map { key ->
+                            when (key) {
+                                "SPACE" -> 4.5f
+                                else -> 1f
+                            }
+                        }
+                    } else {
+                        List(row.size) { 1f }
+                    }
+                } else if (latin) {
                     when (r) {
                         0 -> List(row.size) { 1f }
                         1 -> List(row.size) { 1f }
@@ -125,13 +136,13 @@ class AinuKeyboardService : InputMethodService() {
                 }
 
                 val totalWeight = weights.sum()
-                val unitW = if (latinMode && r == 1) {
+                val unitW = if (!emojiMode && latinMode && r == 1) {
                     width.toFloat() / 10f
                 } else {
                     width.toFloat() / totalWeight
                 }
                 val rowWidth = width.toFloat()
-                val offsetX = if (latinMode && r == 1) {
+                val offsetX = if (!emojiMode && latinMode && r == 1) {
                     (rowWidth - rowWidth * totalWeight / 10f) / 2f
                 } else {
                     0f
@@ -212,7 +223,13 @@ class AinuKeyboardService : InputMethodService() {
         fun keyWeights(rowIndex: Int): List<Float> {
             val row = currentRows[rowIndex]
             if (emojiMode) {
-                return List(row.size) { 1f }
+                return if (rowIndex == currentRows.lastIndex) {
+                    row.map { key ->
+                        if (key == "SPACE") 4.5f else 1f
+                    }
+                } else {
+                    List(row.size) { 1f }
+                }
             }
 
             return if (!latin) {
@@ -240,13 +257,13 @@ class AinuKeyboardService : InputMethodService() {
             val row = currentRows[rowIndex]
             val weights = keyWeights(rowIndex)
 
-            val unitW = if (latinMode && rowIndex == 1) {
+            val unitW = if (!emojiMode && latinMode && rowIndex == 1) {
                 width.toFloat() / 10f
             } else {
                 width.toFloat() / weights.sum()
             }
 
-            val offsetX = if (latinMode && rowIndex == 1) {
+            val offsetX = if (!emojiMode && latinMode && rowIndex == 1) {
                 width.toFloat() / 20f
             } else {
                 0f
