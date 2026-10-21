@@ -171,6 +171,10 @@ class AinuKeyboardService : InputMethodService() {
                     }
 
                     paint.color = when {
+                        emojiMode && label in listOf(
+                            "RETURN", "⌫"
+                        ) -> Color.rgb(204, 222, 241)
+
                         numberMode && label in listOf(
                             "😀", "⌫", "ABC", ",", ".", "↵"
                         ) -> Color.rgb(204, 222, 241)
@@ -179,7 +183,7 @@ class AinuKeyboardService : InputMethodService() {
                             "⇧", "⌫", "KATA", ",", ".", "↵"
                         ) -> Color.rgb(204, 222, 241)
 
-                        !latinMode && !numberMode && label in listOf(
+                        !latinMode && !numberMode && !emojiMode && label in listOf(
                             "SPACE", "↵", "→", "⌫", "UNDO",
                             "←", "😀", "ABC", "KATA"
                         ) -> Color.rgb(204, 222, 241)
