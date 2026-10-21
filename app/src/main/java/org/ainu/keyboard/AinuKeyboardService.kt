@@ -17,6 +17,8 @@ class AinuKeyboardService : InputMethodService() {
     private var latinMode = false
     private var latinShift = false
     private var numberMode = false
+    private var emojiMode = false
+    private var returnToLatin = false
     private val undoHistory = mutableListOf<Pair<String, String>>()
 
     override fun onCreateInputView(): View {
@@ -61,11 +63,26 @@ class AinuKeyboardService : InputMethodService() {
             listOf("ABC", ",", "SPACE", ".", "↵")
         )
 
+        private val emojiRows = listOf(
+            listOf("😀", "😎", "😍", "🥰", "😘", "🥺", "🥹", "🥲"),
+            listOf("😭", "😂", "🤣", "😆", "😅", "😳", "😴", "😱"),
+            listOf("😮", "👋", "👏", "👍", "👎", "🙏", "🙇", "🙆"),
+            listOf("🙋", "🙋‍♀️", "💪", "🫶", "❤️", "💕", "💗", "💖"),
+            listOf("💦", "✨", "🔥", "🎉", "🥳", "😘", "🌸", "🐱")
+        )
 
-        private fun rows() = when {
-            numberMode -> numberRows
-            latinMode -> latinRows
-            else -> kanaRows
+        private val emojiBottomRow = listOf(
+            listOf("RETURN", "SPACE", "⌫")
+        )
+
+
+        private fun rows(): List<List<String>> {
+            return when {
+                emojiMode -> emojiRows + emojiBottomRow
+                numberMode -> numberRows
+                latinMode -> latinRows
+                else -> kanaRows
+            }
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -135,8 +152,10 @@ class AinuKeyboardService : InputMethodService() {
 
                     val displayLabel = when (label) {
                         "UNDO" -> "↶"
-                        "SPACE" -> if (latin) "" else "␣"
+                        "SPACE" -> if (emojiMode || latin) "" else "␣"
                         "記" -> "゛"
+                        "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
+                        "😀" -> "☺︎記"
                         else -> label
                     }
 
@@ -313,6 +332,34 @@ class AinuKeyboardService : InputMethodService() {
     }
 
     private fun handleKey(label: String, direction: String) {
+        if (label == "☺︎記" && !emojiMode) {
+            returnToLatin = latinMode || numberMode
+            emojiMode = true
+            setInputView(onCreateInputView())
+            return
+        }
+
+        if (emojiMode) {
+            when (label) {
+                "RETURN" -> {
+                    emojiMode = false
+                    latinMode = returnToLatin
+                    numberMode = false
+                    setInputView(onCreateInputView())
+                }
+                "SPACE" -> insertText(" ")
+                "⌫" -> {
+                    val ic = currentInputConnection
+                    val previous = ic?.getTextBeforeCursor(1, 0)?.toString() ?: ""
+                    if (previous.isNotEmpty()) {
+                        undoHistory.add(previous to "")
+                        ic?.deleteSurroundingText(1, 0)
+                    }
+                }
+                else -> insertText(label)
+            }
+            return
+        }
         val ic = currentInputConnection ?: return
 
         when (label) {
