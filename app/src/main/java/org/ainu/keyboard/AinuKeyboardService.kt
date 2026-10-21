@@ -216,12 +216,21 @@ class AinuKeyboardService : InputMethodService() {
                             val chars = listOf("ア", "A", "1")
                             val widths = chars.map { char ->
                                 paint.isFakeBoldText = false
+                                paint.textSize = if (char == "ア") dp(18).toFloat() else dp(22).toFloat()
                                 paint.measureText(char)
                             }
+
+                            paint.textSize = dp(22).toFloat()
                             val totalWidth = widths.sum()
                             var textX = rect.centerX() - totalWidth / 2f
 
                             for (i in chars.indices) {
+                                paint.textSize = if (chars[i] == "ア") {
+                                    dp(18).toFloat()
+                                } else {
+                                    dp(22).toFloat()
+                                }
+
                                 paint.isFakeBoldText = when {
                                     numberMode -> chars[i] == "1"
                                     latinMode -> chars[i] == "A"
