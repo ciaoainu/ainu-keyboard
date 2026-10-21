@@ -26,7 +26,7 @@ class AinuKeyboardService : InputMethodService() {
         return KeyboardView().apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 24)
+                dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 4)
             )
         }
     }
@@ -87,7 +87,7 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-            val desiredHeight = dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 24)
+            val desiredHeight = dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 4)
             val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
             setMeasuredDimension(measuredWidth, desiredHeight)
         }
@@ -99,7 +99,7 @@ class AinuKeyboardService : InputMethodService() {
 
             val currentRows = rows()
             val latin = latinMode || numberMode
-            val topPadding = dp(24).toFloat()
+            val topPadding = dp(4).toFloat()
             val rowH = (height.toFloat() - topPadding) / currentRows.size
 
             for (r in currentRows.indices) {
@@ -261,7 +261,7 @@ class AinuKeyboardService : InputMethodService() {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val currentRows = rows()
         val latin = latinMode || numberMode
-        val topPadding = dp(24).toFloat()
+        val topPadding = dp(4).toFloat()
         val cellH = (height.toFloat() - topPadding) / currentRows.size
 
         fun keyWeights(rowIndex: Int): List<Float> {
