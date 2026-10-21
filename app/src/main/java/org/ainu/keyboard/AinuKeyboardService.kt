@@ -64,7 +64,7 @@ class AinuKeyboardService : InputMethodService() {
         )
 
         private val emojiRows = listOf(
-            listOf("😀", "😎", "😍", "🥰", "😘", "🥺", "🥹", "🥲"),
+            listOf("😊", "😎", "😍", "🥰", "😘", "🥺", "🥹", "🥲"),
             listOf("😭", "😂", "🤣", "😆", "😅", "😳", "😴", "😱"),
             listOf("😮", "👋", "👏", "👍", "👎", "🙏", "🙇", "🙆"),
             listOf("🙋", "🙋‍♀️", "💪", "🫶", "❤️", "💕", "💗", "💖"),
@@ -166,7 +166,7 @@ class AinuKeyboardService : InputMethodService() {
                         "SPACE" -> if (emojiMode || latin) "" else "␣"
                         "記" -> "゛"
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
-                        "😀" -> if (emojiMode) "😀" else "☺︎記"
+                        "😀" -> "☺︎記"
                         else -> label
                     }
 
