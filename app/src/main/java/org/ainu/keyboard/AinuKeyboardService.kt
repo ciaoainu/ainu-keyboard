@@ -214,13 +214,12 @@ class AinuKeyboardService : InputMethodService() {
 
                         if (label == "ABC" || label == "KATA") {
                             val chars = listOf("ア", "A", "1")
+                            val fontSize = dp(19).toFloat()
+
+                            paint.textSize = fontSize
+
                             val widths = chars.map { char ->
                                 paint.isFakeBoldText = false
-                                paint.textSize = if (char == "ア") {
-                                    dp(16).toFloat()
-                                } else {
-                                    dp(19).toFloat()
-                                }
                                 paint.measureText(char)
                             }
 
@@ -228,24 +227,23 @@ class AinuKeyboardService : InputMethodService() {
                             var textX = rect.centerX() - totalWidth / 2f
 
                             for (i in chars.indices) {
-                                paint.textSize = if (chars[i] == "ア") {
-                                    dp(16).toFloat()
-                                } else {
-                                    dp(19).toFloat()
-                                }
+                                val char = chars[i]
 
                                 paint.isFakeBoldText = when {
-                                    numberMode -> chars[i] == "1"
-                                    latinMode -> chars[i] == "A"
-                                    else -> chars[i] == "ア"
+                                    numberMode -> char == "1"
+                                    latinMode -> char == "A"
+                                    else -> char == "ア"
                                 }
 
-                                val charWidth = paint.measureText(chars[i])
+                                val charWidth = paint.measureText(char)
+                                val fontMetrics = paint.fontMetrics
+                                val charY = rect.centerY() -
+                                    (fontMetrics.ascent + fontMetrics.descent) / 2f
 
                                 canvas.drawText(
-                                    chars[i],
+                                    char,
                                     textX + charWidth / 2f,
-                                    textY,
+                                    charY,
                                     paint
                                 )
 
