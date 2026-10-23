@@ -47,14 +47,14 @@ class AinuKeyboardService : InputMethodService() {
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
             listOf("◂", "タ", "ナ", "ハ", "▸"),
             listOf("☺︎記", "マ", "ヤ", "ラ", "SPACE"),
-            listOf("ABC", "DIACRITICS", "ワ", "PUNCTUATION", "↵")
+            listOf("MODE", "DIACRITICS", "ワ", "PUNCTUATION", "↵")
         )
 
         private val latinRows = listOf(
             listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"),
             listOf("A", "S", "D", "F", "G", "H", "J", "K", "L"),
             listOf("⇧", "Z", "X", "C", "V", "B", "N", "M", "⌫"),
-            listOf("KATA", ",", "SPACE", ".", "↵")
+            listOf("MODE", ",", "SPACE", ".", "↵")
         )
 
         
@@ -62,7 +62,7 @@ class AinuKeyboardService : InputMethodService() {
             listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
             listOf("@", "~", "¥", "_", "=", "-", "+", "(", ")", "/"),
             listOf("☺︎記", "*", "\"", "'", ":", ";", "!", "?", "⌫"),
-            listOf("ABC", ",", "SPACE", ".", "↵")
+            listOf("MODE", ",", "SPACE", ".", "↵")
         )
 
         private val emojiRows = listOf(
@@ -172,7 +172,7 @@ class AinuKeyboardService : InputMethodService() {
                         }
                         3 -> row.map {
                             when (it) {
-                                "KATA", "↵" -> 1.2f
+                                "MODE", "↵" -> 1.2f
                                 "," , "." -> 0.8f
                                 "SPACE" -> 4.5f
                                 else -> 1f
@@ -216,7 +216,7 @@ class AinuKeyboardService : InputMethodService() {
                         "DIACRITICS" -> " ゛"
                         "PUNCTUATION" -> ","
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
-                        "ABC", "KATA" -> "アA1"
+                        "MODE" -> "アA1"
                         "⇧" -> if (capsLock || latinShift) "⇪" else "⇧"
                         else -> if (latinMode && label.length == 1 && label[0].isLetter()) {
                             if (latinShift || capsLock) label.uppercase() else label.lowercase()
@@ -231,16 +231,16 @@ class AinuKeyboardService : InputMethodService() {
                         ) -> Color.rgb(204, 222, 241)
 
                         numberMode && label in listOf(
-                            "☺︎記", "⌫", "ABC", ",", ".", "↵"
+                            "☺︎記", "⌫", "MODE", ",", ".", "↵"
                         ) -> Color.rgb(204, 222, 241)
 
                         latinMode && label in listOf(
-                            "⇧", "⌫", "KATA", ",", ".", "↵"
+                            "⇧", "⌫", "MODE", ",", ".", "↵"
                         ) -> Color.rgb(204, 222, 241)
 
                         !latinMode && !numberMode && !emojiMode && label in listOf(
                             "SPACE", "↵", "▸", "⌫", "UNDO",
-                            "◂", "☺︎記", "ABC", "KATA"
+                            "◂", "☺︎記", "MODE"
                         ) -> Color.rgb(204, 222, 241)
 
                         else -> Color.WHITE
@@ -262,7 +262,7 @@ class AinuKeyboardService : InputMethodService() {
                         val textY = rect.centerY() -
                             (paint.ascent() + paint.descent()) / 2
 
-                        if (label == "ABC" || label == "KATA") {
+                        if (label == "MODE") {
                             drawModeSwitchKey(canvas, rect)
                         } else {
                             canvas.drawText(
@@ -309,7 +309,7 @@ class AinuKeyboardService : InputMethodService() {
                     }
                     3 -> row.map {
                         when (it) {
-                            "KATA", "↵" -> 1.2f
+                            "MODE", "↵" -> 1.2f
                             ",", "." -> 0.8f
                             "SPACE" -> 4.5f
                             else -> 1f
@@ -456,18 +456,18 @@ class AinuKeyboardService : InputMethodService() {
         val ic = currentInputConnection ?: return
 
         when (label) {
-            "ABC", "KATA" -> {
+            "MODE" -> {
                 when {
-                    numberMode -> {
+                    !latinMode && !numberMode -> {
+                        latinMode = true
                         numberMode = false
-                        latinMode = false
                     }
-                    latinMode -> {
+                    latinMode && !numberMode -> {
                         latinMode = false
                         numberMode = true
                     }
                     else -> {
-                        latinMode = true
+                        latinMode = false
                         numberMode = false
                     }
                 }
