@@ -122,7 +122,7 @@ class AinuKeyboardService : InputMethodService() {
                         0 -> List(row.size) { 1f }
                         1 -> List(row.size) { 1f }
                         2 -> row.map {
-                            if (it == "⇧" || it == "😀" || it == "⌫") 1.4f else 1f
+                            if (it == "⇧" || it == "☺︎記" || it == "⌫") 1.4f else 1f
                         }
                         3 -> row.map {
                             when (it) {
@@ -299,7 +299,7 @@ class AinuKeyboardService : InputMethodService() {
                 when (rowIndex) {
                     0, 1 -> List(row.size) { 1f }
                     2 -> row.map {
-                        if (it == "⇧" || it == "😀" || it == "⌫") 1.4f else 1f
+                        if (it == "⇧" || it == "☺︎記" || it == "⌫") 1.4f else 1f
                     }
                     3 -> row.map {
                         when (it) {
@@ -529,8 +529,6 @@ class AinuKeyboardService : InputMethodService() {
             )
 
             "UNDO" -> undo()
-
-            "😀" -> insertText("😀")
 
             "PUNCTUATION" -> insertText(
                 when (direction) {
