@@ -46,7 +46,7 @@ class AinuKeyboardService : InputMethodService() {
         private val kanaRows = listOf(
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
             listOf("◂", "タ", "ナ", "ハ", "▸"),
-            listOf("😀", "マ", "ヤ", "ラ", "SPACE"),
+            listOf("☺︎記", "マ", "ヤ", "ラ", "SPACE"),
             listOf("ABC", "DIACRITICS", "ワ", "PUNCTUATION", "↵")
         )
 
@@ -61,7 +61,7 @@ class AinuKeyboardService : InputMethodService() {
         private val numberRows = listOf(
             listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
             listOf("@", "~", "¥", "_", "=", "-", "+", "(", ")", "/"),
-            listOf("😀", "*", "\"", "'", ":", ";", "!", "?", "⌫"),
+            listOf("☺︎記", "*", "\"", "'", ":", ";", "!", "?", "⌫"),
             listOf("ABC", ",", "SPACE", ".", "↵")
         )
 
@@ -170,7 +170,6 @@ class AinuKeyboardService : InputMethodService() {
                         "DIACRITICS" -> " ゛"
                         "PUNCTUATION" -> ","
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
-                        "😀" -> "☺︎記"
                         "ABC", "KATA" -> "アA1"
                         "⇧" -> if (capsLock || latinShift) "⇪" else "⇧"
                         else -> if (latinMode && label.length == 1 && label[0].isLetter()) {
@@ -186,7 +185,7 @@ class AinuKeyboardService : InputMethodService() {
                         ) -> Color.rgb(204, 222, 241)
 
                         numberMode && label in listOf(
-                            "😀", "⌫", "ABC", ",", ".", "↵"
+                            "☺︎記", "⌫", "ABC", ",", ".", "↵"
                         ) -> Color.rgb(204, 222, 241)
 
                         latinMode && label in listOf(
@@ -195,7 +194,7 @@ class AinuKeyboardService : InputMethodService() {
 
                         !latinMode && !numberMode && !emojiMode && label in listOf(
                             "SPACE", "↵", "▸", "⌫", "UNDO",
-                            "◂", "😀", "ABC", "KATA"
+                            "◂", "☺︎記", "ABC", "KATA"
                         ) -> Color.rgb(204, 222, 241)
 
                         else -> Color.WHITE
@@ -420,7 +419,7 @@ class AinuKeyboardService : InputMethodService() {
     }
 
     private fun handleKey(label: String, direction: String) {
-        if ((label == "☺︎記" || label == "😀") && !emojiMode) {
+        if (label == "☺︎記" && !emojiMode) {
             returnToLatin = latinMode || numberMode
             emojiMode = true
             setInputView(onCreateInputView())
