@@ -45,7 +45,7 @@ class AinuKeyboardService : InputMethodService() {
 
         private val kanaRows = listOf(
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
-            listOf("←", "タ", "ナ", "ハ", "→"),
+            listOf("◂", "タ", "ナ", "ハ", "▸"),
             listOf("😀", "マ", "ヤ", "ラ", "SPACE"),
             listOf("ABC", "記", "ワ", "，", "↵")
         )
@@ -169,8 +169,6 @@ class AinuKeyboardService : InputMethodService() {
                         "SPACE" -> if (emojiMode || latin) "" else "␣"
                         "記" -> "゛"
                         "，" -> ","
-                        "←" -> "◂"
-                        "→" -> "▸"
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
                         "ABC", "KATA" -> "アA1"
@@ -196,8 +194,8 @@ class AinuKeyboardService : InputMethodService() {
                         ) -> Color.rgb(204, 222, 241)
 
                         !latinMode && !numberMode && !emojiMode && label in listOf(
-                            "SPACE", "↵", "→", "⌫", "UNDO",
-                            "←", "😀", "ABC", "KATA"
+                            "SPACE", "↵", "▸", "⌫", "UNDO",
+                            "◂", "😀", "ABC", "KATA"
                         ) -> Color.rgb(204, 222, 241)
 
                         else -> Color.WHITE
@@ -523,11 +521,11 @@ class AinuKeyboardService : InputMethodService() {
                 }
             }
 
-            "←" -> ic.sendKeyEvent(
+            "◂" -> ic.sendKeyEvent(
                 KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT)
             )
 
-            "→" -> ic.sendKeyEvent(
+            "▸" -> ic.sendKeyEvent(
                 KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT)
             )
 
