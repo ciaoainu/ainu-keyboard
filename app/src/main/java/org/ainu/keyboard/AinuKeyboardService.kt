@@ -42,7 +42,6 @@ class AinuKeyboardService : InputMethodService() {
         private var startY = 0f
         private var startRow = 0
         private var startCol = 0
-        private var latinShift = false
 
         private val kanaRows = listOf(
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
@@ -485,14 +484,18 @@ class AinuKeyboardService : InputMethodService() {
                     if (capsLock) {
                         capsLock = false
                         latinShift = false
-                    } else if (now - lastShiftTapTime < 400) {
+                        lastShiftTapTime = 0L
+                    } else if (
+                        lastShiftTapTime != 0L &&
+                        now - lastShiftTapTime < 400
+                    ) {
                         capsLock = true
                         latinShift = false
+                        lastShiftTapTime = 0L
                     } else {
                         latinShift = true
+                        lastShiftTapTime = now
                     }
-
-                    lastShiftTapTime = if (capsLock) 0L else now
                 }
             }
 
@@ -554,6 +557,7 @@ class AinuKeyboardService : InputMethodService() {
                         if (!capsLock) {
                             latinShift = false
                         }
+                    }
                 } else {
                     val chars = kanaMap[label] ?: listOf(label)
                     val chosen = when (direction) {
