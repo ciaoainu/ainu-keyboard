@@ -213,7 +213,7 @@ class AinuKeyboardService : InputMethodService() {
                     val displayLabel = when (label) {
                         "UNDO" -> "↶"
                         "SPACE" -> if (emojiMode || latin) "" else "␣"
-                        "DIACRITICS" -> " ゛"
+                        "DIACRITICS" -> "゛"
                         "PUNCTUATION" -> ","
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "MODE" -> "アA1"
@@ -254,11 +254,14 @@ class AinuKeyboardService : InputMethodService() {
                         paint.color = Color.rgb(35, 43, 55)
                         paint.textAlign = Paint.Align.CENTER
                         paint.textSize = when {
+                            displayLabel == "␣" -> dp(44).toFloat()
                             label == "SPACE" -> dp(13).toFloat()
                             label == "UNDO" -> dp(26).toFloat()
-                            label == "☺︎記" -> dp(17).toFloat()
-                            label == "DIACRITICS" -> dp(17).toFloat()
+                            label == "☺︎記" -> dp(21).toFloat()
+                            label == "DIACRITICS" -> dp(19).toFloat()
                             label == "PUNCTUATION" -> dp(26).toFloat()
+                            label == "◂" || label == "▸" -> dp(44).toFloat()
+                            label == "↵" -> dp(44).toFloat()
                             label.length > 2 -> dp(14).toFloat()
                             else -> dp(22).toFloat()
                         }
