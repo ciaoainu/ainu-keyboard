@@ -28,7 +28,7 @@ class AinuKeyboardService : InputMethodService() {
         return KeyboardView().apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 4)
+                dp((if (emojiMode) 340 else if (latinMode || numberMode) 300 else 250) + 4)
             )
         }
     }
@@ -88,7 +88,7 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-            val desiredHeight = dp((if (emojiMode) 340 else if (latinMode) 300 else 250) + 4)
+            val desiredHeight = dp((if (emojiMode) 340 else if (latinMode || numberMode) 300 else 250) + 4)
             val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
             setMeasuredDimension(measuredWidth, desiredHeight)
         }
