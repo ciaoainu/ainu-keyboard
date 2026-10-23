@@ -17,6 +17,8 @@ class AinuKeyboardService : InputMethodService() {
 
     private var latinMode = false
     private var latinShift = false
+    private var capsLock = false
+    private var lastShiftTapTime = 0L
     private var numberMode = false
     private var emojiMode = false
     private var returnToLatin = false
@@ -173,7 +175,12 @@ class AinuKeyboardService : InputMethodService() {
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
                         "ABC", "KATA" -> "アA1"
-                        else -> label
+                        "⇧" -> if (capsLock) "⇪" else "⇧"
+                        else -> if (latinMode && label.length == 1 && label[0].isLetter()) {
+                            if (latinShift || capsLock) label.uppercase() else label.lowercase()
+                        } else {
+                            label
+                        }
                     }
 
                     paint.color = when {
@@ -473,7 +480,19 @@ class AinuKeyboardService : InputMethodService() {
 
             "⇧" -> {
                 if (latinMode) {
-                    latinShift = !latinShift
+                    val now = android.os.SystemClock.uptimeMillis()
+
+                    if (capsLock) {
+                        capsLock = false
+                        latinShift = false
+                    } else if (now - lastShiftTapTime < 400) {
+                        capsLock = true
+                        latinShift = false
+                    } else {
+                        latinShift = true
+                    }
+
+                    lastShiftTapTime = if (capsLock) 0L else now
                 }
             }
 
@@ -524,15 +543,17 @@ class AinuKeyboardService : InputMethodService() {
             else -> {
                 if (latinMode) {
                     if (label.length == 1 && label[0].isLetter()) {
-                        val output = if (latinShift) {
+                        val output = if (latinShift || capsLock) {
                             label.uppercase()
                         } else {
                             label.lowercase()
                         }
 
                         insertText(output)
-                        latinShift = false
-                    }
+
+                        if (!capsLock) {
+                            latinShift = false
+                        }
                 } else {
                     val chars = kanaMap[label] ?: listOf(label)
                     val chosen = when (direction) {
