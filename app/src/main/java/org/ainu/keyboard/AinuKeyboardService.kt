@@ -174,7 +174,7 @@ class AinuKeyboardService : InputMethodService() {
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
                         "ABC", "KATA" -> "アA1"
-                        "⇧" -> if (capsLock) "⇪" else "⇧"
+                        "⇧" -> if (capsLock || latinShift) "⇪" else "⇧"
                         else -> if (latinMode && label.length == 1 && label[0].isLetter()) {
                             if (latinShift || capsLock) label.uppercase() else label.lowercase()
                         } else {
@@ -485,6 +485,18 @@ class AinuKeyboardService : InputMethodService() {
                         capsLock = false
                         latinShift = false
                         lastShiftTapTime = 0L
+                    } else if (latinShift) {
+                        if (
+                            lastShiftTapTime != 0L &&
+                            now - lastShiftTapTime < 400
+                        ) {
+                            capsLock = true
+                            latinShift = false
+                            lastShiftTapTime = 0L
+                        } else {
+                            latinShift = false
+                            lastShiftTapTime = 0L
+                        }
                     } else if (
                         lastShiftTapTime != 0L &&
                         now - lastShiftTapTime < 400
@@ -496,6 +508,8 @@ class AinuKeyboardService : InputMethodService() {
                         latinShift = true
                         lastShiftTapTime = now
                     }
+
+                    invalidate()
                 }
             }
 
@@ -556,6 +570,7 @@ class AinuKeyboardService : InputMethodService() {
 
                         if (!capsLock) {
                             latinShift = false
+                            lastShiftTapTime = 0L
                         }
                     }
                 } else {
