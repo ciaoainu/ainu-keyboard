@@ -254,6 +254,14 @@ class AinuKeyboardService : InputMethodService() {
                         paint.color = Color.rgb(35, 43, 55)
                         paint.textAlign = Paint.Align.CENTER
                         paint.textSize = when {
+                            if (
+                                label == "UNDO" ||
+                                label == "☺︎記" ||
+                                label == "DIACRITICS" ||
+                                label == "PUNCTUATION"
+                            ) {
+                                paint.textSize *= 1.2f
+                            }
                             label == "SPACE" -> dp(13).toFloat()
                             label.length > 2 -> dp(14).toFloat()
                             else -> dp(22).toFloat()
