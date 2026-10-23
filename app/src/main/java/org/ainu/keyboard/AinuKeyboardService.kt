@@ -47,7 +47,7 @@ class AinuKeyboardService : InputMethodService() {
             listOf("UNDO", "ア", "カ", "サ", "⌫"),
             listOf("◂", "タ", "ナ", "ハ", "▸"),
             listOf("😀", "マ", "ヤ", "ラ", "SPACE"),
-            listOf("ABC", "記", "ワ", "，", "↵")
+            listOf("ABC", "DIACRITICS", "ワ", "PUNCTUATION", "↵")
         )
 
         private val latinRows = listOf(
@@ -167,8 +167,8 @@ class AinuKeyboardService : InputMethodService() {
                     val displayLabel = when (label) {
                         "UNDO" -> "↶"
                         "SPACE" -> if (emojiMode || latin) "" else "␣"
-                        "記" -> "゛"
-                        "，" -> ","
+                        "DIACRITICS" -> " ゛"
+                        "PUNCTUATION" -> ","
                         "RETURN" -> if (returnToLatin) "ABC" else "アイウ"
                         "😀" -> "☺︎記"
                         "ABC", "KATA" -> "アA1"
@@ -533,7 +533,7 @@ class AinuKeyboardService : InputMethodService() {
 
             "😀" -> insertText("😀")
 
-            "，" -> insertText(
+            "PUNCTUATION" -> insertText(
                 when (direction) {
                     "left" -> "。"
                     "up" -> "?"
@@ -543,7 +543,7 @@ class AinuKeyboardService : InputMethodService() {
                 }
             )
 
-            "記" -> {
+            "DIACRITICS" -> {
                 when (direction) {
                     "left" -> transformPrevious("dakuten")
                     "right" -> transformPrevious("handakuten")
