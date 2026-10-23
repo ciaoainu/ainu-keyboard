@@ -220,6 +220,7 @@ class AinuKeyboardService : InputMethodService() {
 
                             val widths = chars.map { char ->
                                 paint.isFakeBoldText = false
+                                paint.textSize = if (char == "ア") dp(17).toFloat() else fontSize
                                 paint.measureText(char)
                             }
 
@@ -228,6 +229,7 @@ class AinuKeyboardService : InputMethodService() {
 
                             for (i in chars.indices) {
                                 val char = chars[i]
+                                paint.textSize = if (char == "ア") dp(17).toFloat() else fontSize
 
                                 paint.isFakeBoldText = when {
                                     numberMode -> char == "1"
