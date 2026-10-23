@@ -508,8 +508,6 @@ class AinuKeyboardService : InputMethodService() {
                         latinShift = true
                         lastShiftTapTime = now
                     }
-
-                    invalidate()
                 }
             }
 
