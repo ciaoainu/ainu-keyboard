@@ -94,6 +94,52 @@ class AinuKeyboardService : InputMethodService() {
         }
 
         
+        private fun drawModeSwitchKey(
+            canvas: Canvas,
+            rect: RectF
+        ) {
+            val chars = listOf("ア", "A", "1")
+            val activeChar = when {
+                numberMode -> "1"
+                latinMode -> "A"
+                else -> "ア"
+            }
+
+            val sizes = chars.map { char ->
+                if (char == "ア") dp(17).toFloat() else dp(19).toFloat()
+            }
+
+            paint.textAlign = Paint.Align.CENTER
+            paint.isFakeBoldText = false
+
+            val widths = chars.indices.map { i ->
+                paint.textSize = sizes[i]
+                paint.measureText(chars[i])
+            }
+
+            var x = rect.centerX() - widths.sum() / 2f
+
+            for (i in chars.indices) {
+                val char = chars[i]
+                paint.textSize = sizes[i]
+                paint.isFakeBoldText = char == activeChar
+
+                val metrics = paint.fontMetrics
+                val y = rect.centerY() - (metrics.ascent + metrics.descent) / 2f
+
+                canvas.drawText(
+                    char,
+                    x + widths[i] / 2f,
+                    y,
+                    paint
+                )
+
+                x += widths[i]
+            }
+
+            paint.isFakeBoldText = false
+        }
+        
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
             canvas.drawColor(Color.rgb(224, 229, 237))
@@ -217,47 +263,7 @@ class AinuKeyboardService : InputMethodService() {
                             (paint.ascent() + paint.descent()) / 2
 
                         if (label == "ABC" || label == "KATA") {
-                            val chars = listOf("ア", "A", "1")
-                            val fontSize = dp(19).toFloat()
-
-                            paint.textSize = fontSize
-
-                            val widths = chars.map { char ->
-                                paint.isFakeBoldText = false
-                                paint.textSize = if (char == "ア") dp(17).toFloat() else fontSize
-                                paint.measureText(char)
-                            }
-
-                            val totalWidth = widths.sum()
-                            var textX = rect.centerX() - totalWidth / 2f
-
-                            for (i in chars.indices) {
-                                val char = chars[i]
-                                paint.textSize = if (char == "ア") dp(17).toFloat() else fontSize
-
-                                paint.isFakeBoldText = when {
-                                    numberMode -> char == "1"
-                                    latinMode -> char == "A"
-                                    else -> char == "ア"
-                                }
-
-                                val charWidth = paint.measureText(char)
-                                val fontMetrics = paint.fontMetrics
-                                val charY = rect.centerY() -
-                                    (fontMetrics.ascent + fontMetrics.descent) / 2f
-
-                                canvas.drawText(
-                                    char,
-                                    textX + charWidth / 2f,
-                                    charY,
-                                    paint
-                                )
-
-                                textX += widths[i]
-                            }
-
-                            paint.isFakeBoldText = false
-                            paint.textSize = dp(22).toFloat()
+                            drawModeSwitchKey(canvas, rect)
                         } else {
                             canvas.drawText(
                                 displayLabel,
