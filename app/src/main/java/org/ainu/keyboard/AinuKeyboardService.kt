@@ -269,7 +269,7 @@ class AinuKeyboardService : InputMethodService() {
 
                         val textY = rect.centerY() -
                             (paint.ascent() + paint.descent()) / 2 +
-                            if (label == "↵") dp(-6).toFloat() else 0f
+                            if (label == "↵") dp(-7).toFloat() else 0f
 
                         if (label == "MODE") {
                             drawModeSwitchKey(canvas, rect)
