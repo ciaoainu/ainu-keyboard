@@ -261,15 +261,15 @@ class AinuKeyboardService : InputMethodService() {
                             label == "DIACRITICS" -> dp(20).toFloat()
                             label == "PUNCTUATION" -> dp(26).toFloat()
                             label == "◂" -> dp(32).toFloat()
-                            label == "▸" -> dp(35).toFloat()
-                            label == "↵" -> dp(38).toFloat()
+                            label == "▸" -> dp(34).toFloat()
+                            label == "↵" -> dp(40).toFloat()
                             label.length > 2 -> dp(14).toFloat()
                             else -> dp(22).toFloat()
                         }
 
                         val textY = rect.centerY() -
                             (paint.ascent() + paint.descent()) / 2 +
-                            if (label == "↵") dp(-5).toFloat() else 0f
+                            if (label == "↵") dp(-6).toFloat() else 0f
 
                         if (label == "MODE") {
                             drawModeSwitchKey(canvas, rect)
