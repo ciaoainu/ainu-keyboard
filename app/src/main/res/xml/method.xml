@@ -4,7 +4,7 @@
     android:supportsSwitchingToNextInputMethod="true">
 
     <subtype
-        android:label="@string/app_name"
+        android:label="@string/ainu_subtype"
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeLocale="und" />
 
