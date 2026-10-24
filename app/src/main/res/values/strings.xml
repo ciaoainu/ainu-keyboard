@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ainu Keyboard</string>
+    <string name="app_name">アイヌ イタㇰ</string>
+    <string name="ainu_subtype">Ainu</string>
 </resources>
