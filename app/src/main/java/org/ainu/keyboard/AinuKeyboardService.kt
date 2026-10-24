@@ -9,9 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.MotionEvent
 import android.view.KeyEvent
-import android.view.inputmethod.InputConnection
 import kotlin.math.abs
-import android.graphics.Typeface
 
 class AinuKeyboardService : InputMethodService() {
 
